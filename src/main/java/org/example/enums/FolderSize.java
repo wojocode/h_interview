@@ -1,6 +1,6 @@
 package org.example.enums;
 
-public enum FoldersSize {
+public enum FolderSize {
     SMALL,
     MEDIUM,
     LARGE;
