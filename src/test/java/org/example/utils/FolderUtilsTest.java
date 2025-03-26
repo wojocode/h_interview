@@ -1,70 +1,44 @@
 package org.example.utils;
 
-import org.example.interfaces.Folder;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class FolderUtilsTest {
     FolderUtils folderUtils;
+
 
     @Before
     public void setUp() {
         folderUtils = new FolderUtils();
     }
 
-
     @Test
     public void shouldReturnTrueWhenSizeIsValid() {
-        //given
-        Folder folder = mock(Folder.class);
-        when(folder.getSize()).thenReturn("SMALL");
-
-        //when && then
-        assertTrue(folderUtils.isValidSize(folder.getSize()));
+        assertTrue(folderUtils.isValidSize("SMALL"));
     }
 
     @Test
     public void shouldReturnTrueWhenSizeIsValidDiffCase() {
-        //given
-        Folder folder = mock(Folder.class);
-        when(folder.getSize()).thenReturn("SMAll");
-
-        //when && then
-        assertTrue(folderUtils.isValidSize(folder.getSize()));
+        assertTrue(folderUtils.isValidSize("SMAll"));
     }
 
     @Test
     public void shouldReturnFalseWhenSizeIsInvalid() {
-        //given
-        Folder folder = mock(Folder.class);
-        when(folder.getSize()).thenReturn("SMAl");
-
-        //when && then
-        assertFalse(folderUtils.isValidSize(folder.getSize()));
+        assertFalse(folderUtils.isValidSize("SMAl"));
     }
 
     @Test
     public void shouldReturnFalseWhenSizeIsNull() {
-        //given
-        Folder folder = mock(Folder.class);
-        when(folder.getSize()).thenReturn(null);
-
-        //when && then
-        assertFalse(folderUtils.isValidSize(folder.getSize()));
+        assertFalse(folderUtils.isValidSize(null));
     }
 
     @Test
     public void shouldReturnFalseWhenSizeIsEmpty() {
-        //given
-        Folder folder = mock(Folder.class);
-        when(folder.getSize()).thenReturn("");
-
-        //when && then
-        assertFalse(folderUtils.isValidSize(folder.getSize()));
+        assertFalse(folderUtils.isValidSize(""));
     }
 
 }

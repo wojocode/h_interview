@@ -25,6 +25,9 @@ public class FileCabinetTest {
     @Mock
     public FolderUtils folderUtils;
 
+    @Mock
+    public Folder folder;
+
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -34,7 +37,6 @@ public class FileCabinetTest {
     @Test
     public void shouldFindFolderByName() {
         //given
-        Folder folder = mock(Folder.class);
         when(folder.getName()).thenReturn("TestFolder");
         when(folder.getSize()).thenReturn("SMALL");
 
@@ -57,7 +59,6 @@ public class FileCabinetTest {
     @Test
     public void shouldFindFoldersBySize() {
         //given
-        Folder folder = mock(Folder.class);
         when(folder.getName()).thenReturn("TestFolder");
         when(folder.getSize()).thenReturn("SMALL");
 
@@ -92,7 +93,6 @@ public class FileCabinetTest {
     @Test
     public void shouldCountAllFolders() {
         //given
-        Folder folder = mock(Folder.class);
         when(folder.getName()).thenReturn("TestFolder");
 
         Folder folder1 = mock(Folder.class);
@@ -105,8 +105,14 @@ public class FileCabinetTest {
         filecabinet.getFolders().add(multiFolder);
         filecabinet.getFolders().add(multiFolder1);
 
-
         //when then
         assertEquals(4, filecabinet.count());
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenFolderNotFound() {
+        filecabinet.getFolders().add(mock(MultiFolder.class));
+        Optional<Folder> result = filecabinet.findFolderByName("NonExisting");
+        assertTrue(result.isEmpty());
     }
 }
