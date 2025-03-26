@@ -1,18 +1,24 @@
 package org.example.service;
 
-import org.example.enums.FolderSize;
 import org.example.interfaces.Cabinet;
 import org.example.interfaces.Folder;
 import org.example.interfaces.MultiFolder;
+import org.example.utils.FolderUtils;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class FileCabinet implements Cabinet {
-    private final List<Folder> folders = new ArrayList<>();
+    private final List<Folder> folders;
+    private final FolderUtils folderUtils;
+
+    public FileCabinet(List<Folder> folders, FolderUtils folderUtils) {
+        this.folders = folders;
+        this.folderUtils = folderUtils;
+    }
 
     public List<Folder> getFolders() {
         return folders;
@@ -33,14 +39,14 @@ public class FileCabinet implements Cabinet {
 
     // zwraca wszystkie foldery podanego rozmiaru SMALL/MEDIUM/LARGE
     @Override
-    public List<Folder> findFoldersBySize(FolderSize size) {
-        if (size == null) {
-            throw new IllegalArgumentException("Size cannot be null");
+    public List<Folder> findFoldersBySize(String size) {
+        if (!folderUtils.isValidSize(size)) {
+            throw new IllegalArgumentException("Invalid folder size: " + size);
         }
         return folders.stream()
                 .filter(Objects::nonNull)
                 .filter(folder -> folder.getSize() != null)
-                .filter(fl -> size.equals(fl.getSize()))
+                .filter(fl -> size.equalsIgnoreCase(fl.getSize()))
                 .toList();
     }
 
@@ -50,9 +56,10 @@ public class FileCabinet implements Cabinet {
         return getAllFolders(folders).size();
     }
 
-    // methods to create flat list
     private List<Folder> getAllFolders(List<Folder> folders) {
-        return folders.stream()
+        return Optional.ofNullable(folders)
+                .orElseGet(Collections::emptyList)
+                .stream()
                 .filter(Objects::nonNull)
                 .flatMap(this::flattenFolder)
                 .toList();
@@ -60,9 +67,10 @@ public class FileCabinet implements Cabinet {
 
     private Stream<Folder> flattenFolder(Folder folder) {
         if (folder instanceof MultiFolder multiFolder) {
+            List<Folder> subfolders = Optional.ofNullable(multiFolder.getFolders()).orElse(List.of());
             return Stream.concat(
                     Stream.of(folder),
-                    multiFolder.getFolders().stream()
+                    subfolders.stream()
                             .filter(Objects::nonNull)
                             .flatMap(this::flattenFolder)
             );

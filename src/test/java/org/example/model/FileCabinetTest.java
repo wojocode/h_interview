@@ -1,16 +1,20 @@
 package org.example.model;
 
-import org.example.enums.FolderSize;
 import org.example.interfaces.Folder;
 import org.example.interfaces.MultiFolder;
 import org.example.service.FileCabinet;
+import org.example.utils.FolderUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,9 +22,13 @@ import static org.mockito.Mockito.when;
 public class FileCabinetTest {
     public FileCabinet filecabinet;
 
+    @Mock
+    public FolderUtils folderUtils;
+
     @Before
     public void setUp() {
-        filecabinet = new FileCabinet();
+        MockitoAnnotations.openMocks(this);
+        filecabinet = new FileCabinet(new ArrayList<>(), folderUtils);
     }
 
     @Test
@@ -28,44 +36,57 @@ public class FileCabinetTest {
         //given
         Folder folder = mock(Folder.class);
         when(folder.getName()).thenReturn("TestFolder");
-        when(folder.getSize()).thenReturn(FolderSize.valueOf("SMALL"));
+        when(folder.getSize()).thenReturn("SMALL");
 
         MultiFolder multiFolder = mock(MultiFolder.class);
         when(multiFolder.getName()).thenReturn("Parent");
-        when(multiFolder.getSize()).thenReturn(FolderSize.valueOf("LARGE"));
+        when(multiFolder.getSize()).thenReturn("LARGE");
         when(multiFolder.getFolders()).thenReturn(List.of(folder));
 
-        FileCabinet cabinet = new FileCabinet();
-        cabinet.getFolders().add(multiFolder);
+        filecabinet.getFolders().add(multiFolder);
 
         //when
-        Optional<Folder> result = cabinet.findFolderByName("TestFolder");
+        Optional<Folder> result = filecabinet.findFolderByName("TestFolder");
 
         //then
         assertTrue(result.isPresent());
         assertEquals("TestFolder", result.get().getName());
     }
 
+    //
     @Test
     public void shouldFindFoldersBySize() {
         //given
         Folder folder = mock(Folder.class);
         when(folder.getName()).thenReturn("TestFolder");
-        when(folder.getSize()).thenReturn(FolderSize.SMALL);
+        when(folder.getSize()).thenReturn("SMALL");
 
         MultiFolder multiFolder = mock(MultiFolder.class);
         when(multiFolder.getName()).thenReturn("Parent");
-        when(multiFolder.getSize()).thenReturn(FolderSize.LARGE);
+        when(multiFolder.getSize()).thenReturn("LARGE");
         when(multiFolder.getFolders()).thenReturn(List.of(folder));
 
+        when(folderUtils.isValidSize("LARGE")).thenReturn(true);
         filecabinet.getFolders().add(multiFolder);
 
         //when
-        List<Folder> files = filecabinet.findFoldersBySize(FolderSize.LARGE);
+        List<Folder> files = filecabinet.findFoldersBySize("LARGE");
 
         //then
         assertEquals(1, files.size());
-        assertEquals(FolderSize.LARGE, files.get(0).getSize());
+        assertEquals("LARGE", files.get(0).getSize());
+    }
+
+    @Test
+    public void shouldThrowIllegalArgumentExceptionWhenSizeIsIncorrect() {
+        //given
+        when(folderUtils.isValidSize("SMa")).thenReturn(false);
+
+        String size = "SMa";
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> {
+            filecabinet.findFoldersBySize(size);
+        });
     }
 
     @Test
@@ -79,11 +100,13 @@ public class FileCabinetTest {
 
         MultiFolder multiFolder = mock(MultiFolder.class);
         when(multiFolder.getFolders()).thenReturn(List.of(folder, folder1));
+        MultiFolder multiFolder1 = mock(MultiFolder.class);
 
-        //when
         filecabinet.getFolders().add(multiFolder);
+        filecabinet.getFolders().add(multiFolder1);
 
-        //then
-        assertEquals(3, filecabinet.count());
+
+        //when then
+        assertEquals(4, filecabinet.count());
     }
 }
