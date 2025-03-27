@@ -16,6 +16,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +37,7 @@ public class FileCabinetTest {
 
     @Test
     public void shouldFindFolderByName() {
-        //given
+        // given
         when(folder.getName()).thenReturn("TestFolder");
         when(folder.getSize()).thenReturn("SMALL");
 
@@ -45,12 +46,13 @@ public class FileCabinetTest {
         when(multiFolder.getSize()).thenReturn("LARGE");
         when(multiFolder.getFolders()).thenReturn(List.of(folder));
 
+        when(folderUtils.getAllFolders(any())).thenReturn(List.of(multiFolder, folder));
         filecabinet.getFolders().add(multiFolder);
 
-        //when
+        // when
         Optional<Folder> result = filecabinet.findFolderByName("TestFolder");
 
-        //then
+        // then
         assertTrue(result.isPresent());
         assertEquals("TestFolder", result.get().getName());
     }
@@ -92,27 +94,39 @@ public class FileCabinetTest {
 
     @Test
     public void shouldCountAllFolders() {
-        //given
+        // given
         when(folder.getName()).thenReturn("TestFolder");
 
         Folder folder1 = mock(Folder.class);
-        when(folder.getName()).thenReturn("TestFolder1");
+        when(folder1.getName()).thenReturn("TestFolder1");
 
         MultiFolder multiFolder = mock(MultiFolder.class);
         when(multiFolder.getFolders()).thenReturn(List.of(folder, folder1));
+
         MultiFolder multiFolder1 = mock(MultiFolder.class);
+        when(folderUtils.getAllFolders(any())).thenReturn(List.of(multiFolder, folder, folder1, multiFolder1));
 
         filecabinet.getFolders().add(multiFolder);
         filecabinet.getFolders().add(multiFolder1);
 
-        //when then
+        // when & then
         assertEquals(4, filecabinet.count());
     }
 
     @Test
     public void shouldReturnEmptyWhenFolderNotFound() {
-        filecabinet.getFolders().add(mock(MultiFolder.class));
+        // given
+        Folder existingFolder = mock(Folder.class);
+        when(existingFolder.getName()).thenReturn("Existing");
+
+        when(folderUtils.getAllFolders(any())).thenReturn(List.of(existingFolder));
+
+        filecabinet.getFolders().add(existingFolder);
+
+        // when
         Optional<Folder> result = filecabinet.findFolderByName("NonExisting");
+
+        // then
         assertTrue(result.isEmpty());
     }
 }

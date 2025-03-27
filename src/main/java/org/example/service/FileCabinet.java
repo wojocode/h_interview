@@ -30,7 +30,7 @@ public class FileCabinet implements Cabinet {
         if (name == null) {
             throw new IllegalArgumentException("Folder name cannot be null");
         }
-        return getAllFolders(folders).stream()
+        return folderUtils.getAllFolders(folders).stream()
                 .filter(Objects::nonNull)
                 .filter(folder -> folder.getName() != null)
                 .filter(folder -> name.equals(folder.getName()))
@@ -53,30 +53,8 @@ public class FileCabinet implements Cabinet {
     // zwraca liczbę wszystkich obiektów tworzących strukturę
     @Override
     public int count() {
-        return getAllFolders(folders).size();
+        return folderUtils.getAllFolders(folders).size();
     }
 
-    private List<Folder> getAllFolders(List<Folder> folders) {
-        return Optional.ofNullable(folders)
-                .orElseGet(Collections::emptyList)
-                .stream()
-                .filter(Objects::nonNull)
-                .flatMap(this::flattenFolder)
-                .toList();
-    }
-
-    private Stream<Folder> flattenFolder(Folder folder) {
-        if (folder instanceof MultiFolder multiFolder) {
-            List<Folder> subfolders = Optional.ofNullable(multiFolder.getFolders()).orElse(List.of());
-            return Stream.concat(
-                    Stream.of(folder),
-                    subfolders.stream()
-                            .filter(Objects::nonNull)
-                            .flatMap(this::flattenFolder)
-            );
-        } else {
-            return Stream.of(folder);
-        }
-    }
 
 }
