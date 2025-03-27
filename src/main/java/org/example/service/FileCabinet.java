@@ -31,7 +31,6 @@ public class FileCabinet implements Cabinet {
             throw new IllegalArgumentException("Folder name cannot be null");
         }
         return folderUtils.getAllFolders(folders).stream()
-                .filter(Objects::nonNull)
                 .filter(folder -> folder.getName() != null)
                 .filter(folder -> name.equals(folder.getName()))
                 .findAny();
@@ -43,8 +42,7 @@ public class FileCabinet implements Cabinet {
         if (!folderUtils.isValidSize(size)) {
             throw new IllegalArgumentException("Invalid folder size: " + size);
         }
-        return folders.stream()
-                .filter(Objects::nonNull)
+        return folderUtils.getAllFolders(folders).stream()
                 .filter(folder -> folder.getSize() != null)
                 .filter(fl -> size.equalsIgnoreCase(fl.getSize()))
                 .toList();

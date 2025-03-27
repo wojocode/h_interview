@@ -60,7 +60,7 @@ public class FileCabinetTest {
     //
     @Test
     public void shouldFindFoldersBySize() {
-        //given
+        // given
         when(folder.getName()).thenReturn("TestFolder");
         when(folder.getSize()).thenReturn("SMALL");
 
@@ -69,13 +69,15 @@ public class FileCabinetTest {
         when(multiFolder.getSize()).thenReturn("LARGE");
         when(multiFolder.getFolders()).thenReturn(List.of(folder));
 
+        when(folderUtils.getAllFolders(any())).thenReturn(List.of(multiFolder, folder));
         when(folderUtils.isValidSize("LARGE")).thenReturn(true);
+
         filecabinet.getFolders().add(multiFolder);
 
-        //when
+        // when
         List<Folder> files = filecabinet.findFoldersBySize("LARGE");
 
-        //then
+        // then
         assertEquals(1, files.size());
         assertEquals("LARGE", files.get(0).getSize());
     }
