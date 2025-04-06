@@ -27,6 +27,9 @@ public class FileCabinetTest {
     public FolderUtils folderUtils;
 
     @Mock
+    public MultiFolder multiFolder;
+
+    @Mock
     public Folder folder;
 
     @Before
@@ -41,21 +44,18 @@ public class FileCabinetTest {
         when(folder.getName()).thenReturn("TestFolder");
         when(folder.getSize()).thenReturn("SMALL");
 
-        MultiFolder multiFolder = mock(MultiFolder.class);
-        when(multiFolder.getName()).thenReturn("Parent");
-        when(multiFolder.getSize()).thenReturn("LARGE");
-        when(multiFolder.getFolders()).thenReturn(List.of(folder));
-
-        when(folderUtils.getAllFolders(any())).thenReturn(List.of(multiFolder, folder));
-        filecabinet.getFolders().add(multiFolder);
+        filecabinet.getFolders().add(folder);
 
         // when
+        when(folderUtils.findFolderNameWithFlattenSearch(any(), any())).thenReturn(Optional.of(folder));
+
         Optional<Folder> result = filecabinet.findFolderByName("TestFolder");
 
         // then
         assertTrue(result.isPresent());
         assertEquals("TestFolder", result.get().getName());
     }
+
 
     //
     @Test

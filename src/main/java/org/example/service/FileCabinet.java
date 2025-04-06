@@ -2,20 +2,19 @@ package org.example.service;
 
 import org.example.interfaces.Cabinet;
 import org.example.interfaces.Folder;
-import org.example.interfaces.MultiFolder;
 import org.example.utils.FolderUtils;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class FileCabinet implements Cabinet {
     private final List<Folder> folders;
     private final FolderUtils folderUtils;
 
     public FileCabinet(List<Folder> folders, FolderUtils folderUtils) {
+        if (folders == null) {
+            throw new IllegalArgumentException("Folders cannot be null");
+        }
         this.folders = folders;
         this.folderUtils = folderUtils;
     }
@@ -30,10 +29,13 @@ public class FileCabinet implements Cabinet {
         if (name == null) {
             throw new IllegalArgumentException("Folder name cannot be null");
         }
-        return folderUtils.getAllFolders(folders).stream()
-                .filter(folder -> folder.getName() != null)
-                .filter(folder -> name.equals(folder.getName()))
-                .findAny();
+        for (Folder value : folders) {
+            if (value != null) {
+                Optional<Folder> folder = folderUtils.findFolderNameWithFlattenSearch(value, name);
+                if (folder.isPresent()) return folder;
+            }
+        }
+        return Optional.empty();
     }
 
     // zwraca wszystkie foldery podanego rozmiaru SMALL/MEDIUM/LARGE

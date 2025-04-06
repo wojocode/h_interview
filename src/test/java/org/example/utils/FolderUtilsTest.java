@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -124,10 +125,32 @@ public class FolderUtilsTest {
         when(mf1.getFolders()).thenReturn(List.of(sub1));
         when(mf2.getFolders()).thenReturn(List.of(sub2));
 
-        List<Folder> result = folderUtils.getAllFolders(List.of(mf1, mf2));
 
+        List<Folder> result = folderUtils.getAllFolders(List.of(mf1, mf2));
         assertEquals(4, result.size());
         assertTrue(result.containsAll(List.of(mf1, sub1, mf2, sub2)));
+    }
+
+    @Test
+    public void shouldFlattenFolderIterative() {
+        String testFolder = "TestFolder";
+        when(folder.getName()).thenReturn(testFolder);
+        when(multiFolder.getFolders()).thenReturn(List.of(folder));
+
+
+        Optional<Folder> folder1 = folderUtils.findFolderNameWithFlattenSearch(folder, testFolder);
+        assertTrue(folder1.isPresent());
+        assertEquals(testFolder, folder1.get().getName());
+    }
+
+    @Test
+    public void shouldDetectEmptyOptionalIfFlattenFolderIterativeNotFoundFolderWithSpecificName() {
+        String testFolder = "TestFolder";
+        when(folder.getName()).thenReturn(testFolder);
+        when(multiFolder.getFolders()).thenReturn(List.of(folder));
+
+        Optional<Folder> folder1 = folderUtils.findFolderNameWithFlattenSearch(folder, "wrongName");
+        assertTrue(folder1.isEmpty());
     }
 
 }
